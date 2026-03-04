@@ -5,45 +5,53 @@ import prisma from "@/lib/prisma";
 import { extractUrlData } from "./extract-url-data";
 import { saveArticle } from "./save-article";
 
-export async function registerArticle(formData: FormData) {
-  const rawUrl = formData.get("url");
-  const url = typeof rawUrl === "string" ? rawUrl.trim() : "";
+export type RegisterArticleState = { error?: string } | null;
 
-  if (!url) {
-    throw new Error("URLを入力してください");
-  }
-
+export async function registerArticle(
+  _prevState: RegisterArticleState,
+  formData: FormData
+): Promise<RegisterArticleState> {
   try {
-    new URL(url);
-  } catch {
-    throw new Error("正しいURL形式で入力してください");
-  }
+    const rawUrl = formData.get("url");
+    const url = typeof rawUrl === "string" ? rawUrl.trim() : "";
 
-  const articleData = await extractUrlData(url);
+    if (!url) {
+      return { error: "URLを入力してください" };
+    }
 
-  const existingArticle = await prisma.article.findUnique({
-    where: { url: articleData.url },
-    select: { id: true },
-  });
+    try {
+      new URL(url);
+    } catch {
+      return { error: "正しいURL形式で入力してください" };
+    }
 
-  if (existingArticle) {
-    revalidatePath("/");
-    return;
-  }
+    const articleData = await extractUrlData(url);
 
-  let user = await prisma.user.findFirst({
-    select: { id: true },
-  });
-
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        name: "Guest User",
-      },
+    let user = await prisma.user.findFirst({
       select: { id: true },
     });
-  }
 
-  await saveArticle(articleData, user.id);
-  revalidatePath("/");
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          name: "Guest User",
+        },
+        select: { id: true },
+      });
+    }
+
+    const result = await saveArticle(articleData, user.id);
+    if (!result.success) {
+      return {
+        error: result.errorMessage ?? "予期しないエラーが発生しました",
+      };
+    }
+    revalidatePath("/");
+    return null;
+  } catch (err) {
+    console.error(err);
+    const message =
+      err instanceof Error ? err.message : "記事の登録に失敗しました";
+    return { error: message };
+  }
 }
