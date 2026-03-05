@@ -2,14 +2,10 @@ import Image from "next/image";
 import { CiClock2 } from "react-icons/ci";
 import { FaRegHeart, FaArchive } from "react-icons/fa";
 import { FaRegTrashCan } from "react-icons/fa6";
-import prisma from "@/lib/prisma";
+import { getArticles } from "../actions/articles/get-articles";
 
 async function ArticleLists() {
-  const articleData = await prisma.article.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const articleData = await getArticles();
 
   if (articleData.length === 0) {
     return (
@@ -34,6 +30,15 @@ async function ArticleLists() {
             key={article.id}
             className="border group hover:bg-gray-50 transition-colors px-4 pt-4 pb-3 relative"
           >
+            {/* カード全体をリンク化（下部アイコンはそのまま操作可能） */}
+            <a
+              href={article.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${article.title} へ移動`}
+              className="absolute inset-0 z-10"
+            />
+
             <div className="flex justify-between flex-col-reverse md:flex-row gap-8">
               {/* 左側 （タイトル・デスクリプション等）*/}
               <div className="w-full md:w-3/5 lg:w-3/4 flex flex-col">
@@ -69,7 +74,9 @@ async function ArticleLists() {
                       sizes="300px"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-100 border border-gray-200 rounded" />
+                    <div className="w-full h-full bg-gray-100 border border-gray-200 rounded flex items-center justify-center">
+                      <span className="text-gray-400 text-sm">画像なし</span>
+                    </div>
                   )}
                 </div>
               </div>
