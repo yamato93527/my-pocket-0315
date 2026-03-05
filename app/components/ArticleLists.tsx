@@ -1,8 +1,9 @@
 import Image from "next/image";
 import { CiClock2 } from "react-icons/ci";
-import { FaRegHeart, FaArchive } from "react-icons/fa";
-import { FaRegTrashCan } from "react-icons/fa6";
 import { getArticles } from "../actions/articles/get-articles";
+import LikeButton from "./LikeButton";
+import ArchiveButton from "./ArchiveButton";
+import DeleteButton from "./DeleteButton";
 
 async function ArticleLists() {
   const articleData = await getArticles();
@@ -95,13 +96,19 @@ async function ArticleLists() {
               <div className="relative z-20 mt-2 md:mt-6">
                 <div className="flex justify-start md:justify-between gap-5 items-center text-xl">
                   {/* お気に入りボタン */}
-                  <FaRegHeart />
+                  <LikeButton
+                    articleId={article.id}
+                    initialIsLiked={article.isLiked}
+                  />
 
                   {/* アーカイブボタン */}
-                  <FaArchive />
+                  <ArchiveButton
+                    articleId={article.id}
+                    initialIsArchived={article.isArchived}
+                  />
 
                   {/* デリートボタン */}
-                  <FaRegTrashCan />
+                  <DeleteButton articleId={article.id} />
                 </div>
               </div>
             </div>
