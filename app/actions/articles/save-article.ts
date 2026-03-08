@@ -11,10 +11,17 @@ type ArticleDataProps = {
   thumbnail: string;
   url: string;
   content: string;
-}
+};
 
+export type SaveArticleResult = {
+  success: boolean;
+  errorMessage?: string;
+};
 
-export async function saveArticle(articleData: ArticleDataProps, userId: string) {
+export async function saveArticle(
+  articleData: ArticleDataProps,
+  userId: string
+): Promise<SaveArticleResult> {
   try {
     const isDuplicate = await checkUrlExists(articleData.url);
     if (isDuplicate) {
