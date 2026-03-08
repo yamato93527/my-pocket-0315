@@ -1,20 +1,21 @@
- "use server";
+"use server";
 
 import prisma from "@/lib/prisma";
 
-export async function getArticles() {
-  try {
-    const userId = "temp-user-123";
+type GetArticlesProps = {
+  userId: string;
+  isLiked?: boolean;
+  isArchived?: boolean;
+};
 
+export async function getArticles(whereCondition: GetArticlesProps) {
+  try {
     const articles = await prisma.article.findMany({
-      where: {
-        userId,
-      },
+      where: whereCondition,
       orderBy: {
         createdAt: "desc",
       },
     });
-
     return articles;
   } catch (err) {
     console.error(err);

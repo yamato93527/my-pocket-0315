@@ -1,12 +1,22 @@
 import Image from "next/image";
 import { CiClock2 } from "react-icons/ci";
 import { getArticles } from "../actions/articles/get-articles";
+import { getWhereCondition } from "@/lib/getWhereCondition";
+import { getPageTitle } from "@/lib/getPageTitle";
 import LikeButton from "./LikeButton";
 import ArchiveButton from "./ArchiveButton";
 import DeleteButton from "./DeleteButton";
 
-async function ArticleLists() {
-  const articleData = await getArticles();
+interface ArticleListsProps {
+  params: { listtype?: string };
+}
+
+async function ArticleLists({ params }: ArticleListsProps) {
+  const listtype = params.listtype;
+  const userId = "temp-user-123";
+  const whereCondition = getWhereCondition(listtype, userId);
+  const articleData = await getArticles(whereCondition);
+  const pageTitle = getPageTitle(listtype ?? "home");
 
   if (articleData.length === 0) {
     return (
@@ -20,7 +30,7 @@ async function ArticleLists() {
     <div className="w-full lg:w-4/5 px-4">
       {/* タイトル */}
       <div className="flex justify-between mb-4">
-        <h2 className="text-4xl font-bold">記事一覧</h2>
+        <h2 className="text-4xl font-bold">{pageTitle}</h2>
       </div>
 
       <hr />

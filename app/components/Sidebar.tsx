@@ -1,6 +1,7 @@
 import React, { Dispatch, SetStateAction } from "react";
 
 import Link from "next/link";
+import { filterItems } from "../../constants/filterItems";
 import SidebarUserInfo from "./SidebarUserInfo";
 
 type SidebarProps = {
@@ -20,38 +21,16 @@ function Sidebar({ isSidebarOpen}: SidebarProps) {
         <div className="pl-4 pt-4 lg:p-0">
           <h2 className="text-3xl lg:text-2xl font-bold mb-8">フィルター</h2>
           <ul className="flex flex-col gap-6 pl-4">
-            <li>
-              <Link
-                href="#"
-                className="flex items-center gap-3 text-xl"
-              >
-                すべて
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="flex items-center gap-3 text-xl"
-              >
-                ホーム
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="flex items-center gap-3 text-xl"
-              >
-                お気に入り
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="flex items-center gap-3 text-xl"
-              >
-                アーカイブ
-              </Link>
-            </li>
+            {filterItems.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href={item.href}
+                  className="flex items-center gap-3 text-xl"
+                >
+                  {item.name}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
