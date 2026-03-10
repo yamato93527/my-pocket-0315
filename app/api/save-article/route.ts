@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 import { extractUrlData } from "@/app/actions/articles/extract-url-data";
 import { saveArticle } from "@/app/actions/articles/save-article";
+import { getCurrentUserId } from "@/lib/getCurrentUserId";
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,19 +25,8 @@ export async function POST(request: NextRequest) {
     }
 
     const articleData = await extractUrlData(url.trim());
-
-    let user = await prisma.user.findFirst({
-      select: { id: true },
-    });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: { name: "Guest User" },
-        select: { id: true },
-      });
-    }
-
-    const result = await saveArticle(articleData, user.id);
+    const userId = await getCurrentUserId();
+    const result = await saveArticle(articleData, userId);
 
     if (!result.success) {
       const errorMessage = result.errorMessage ?? "保存に失敗しました";

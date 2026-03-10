@@ -4,6 +4,7 @@ import ArticleLists from "./components/ArticleLists";
 interface HomeProps {
   searchParams: Promise<{
     listtype?: string;
+    keyword?: string;
   }>;
 }
 

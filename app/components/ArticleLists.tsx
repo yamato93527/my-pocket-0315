@@ -3,22 +3,39 @@ import { CiClock2 } from "react-icons/ci";
 import { getArticles } from "../actions/articles/get-articles";
 import { getWhereCondition } from "@/lib/getWhereCondition";
 import { getPageTitle } from "@/lib/getPageTitle";
+import { getSearchWhereCondition } from "@/lib/getSearchWhereCondition";
+import { getCurrentUserId } from "@/lib/getCurrentUserId";
 import LikeButton from "./LikeButton";
 import ArchiveButton from "./ArchiveButton";
 import DeleteButton from "./DeleteButton";
 
 interface ArticleListsProps {
-  params: { listtype?: string };
+  params: {
+    listtype?: string;
+    keyword?: string;
+  };
 }
 
 async function ArticleLists({ params }: ArticleListsProps) {
-  const listtype = params.listtype;
-  const userId = "temp-user-123";
-  const whereCondition = getWhereCondition(listtype, userId);
-  const articleData = await getArticles(whereCondition);
-  const pageTitle = getPageTitle(listtype ?? "home");
+  const listtype = params.listtype || "default";
+  const keyword = params.keyword;
+  const userId = await getCurrentUserId();
 
-  if (articleData.length === 0) {
+  let whereCondition: Parameters<typeof getArticles>[0];
+  let pageTitle: string;
+
+  if (keyword) {
+    // 検索の処理
+    pageTitle = `検索結果:${keyword}`;
+    whereCondition = getSearchWhereCondition(keyword, userId);
+  } else {
+    whereCondition = getWhereCondition(listtype, userId);
+    pageTitle = getPageTitle(listtype);
+  }
+
+  const articlesData = await getArticles(whereCondition);
+
+  if (!articlesData || articlesData.length === 0) {
     return (
       <div className="w-full lg:w-4/5 px-4 text-center text-gray-600">
         まだ記事が登録されていません
@@ -36,7 +53,7 @@ async function ArticleLists({ params }: ArticleListsProps) {
       <hr />
 
       <div className="p-4 flex flex-col gap-4">
-        {articleData.map((article) => (
+        {articlesData.map((article) => (
           <div
             key={article.id}
             className="border group hover:bg-gray-50 transition-colors px-4 pt-4 pb-3 relative"
