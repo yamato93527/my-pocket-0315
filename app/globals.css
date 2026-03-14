@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
-
+/* ページ全体がスクロールできるようにする */
+html,
+body {
+  overflow-y: auto;
+  min-height: 100%;
+}
 
 @theme {
   

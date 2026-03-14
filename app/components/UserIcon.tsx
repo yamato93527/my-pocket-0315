@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 
 function UserIcon() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data: session } = useSession();
 
   return (
     <div className="hidden lg:flex relative h-11/12 aspect-square items-center">
@@ -14,27 +16,32 @@ function UserIcon() {
       >
         <Image
           className="object-cover"
-          src="/images/userIcon.png"
+          src={session?.user?.image || "/images/userIcon.png"}
           fill={true}
           alt="ユーザーアイコン画像"
           sizes="80px"
         />
       </button>
 
-      {/* ドロップダウンメニュー */}
       {isMenuOpen && (
         <div className="absolute right-0 top-5 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border">
           <div className="px-4 py-2 border-b">
-            <p className="text-sm font-medium text-gray-900">ゆう</p>
-            <p className="text-sm text-gray-500">sample@example.com</p>
+            <p className="text-sm font-medium text-gray-900">{session?.user?.name || "ゲスト"}</p>
+            <p className="text-sm text-gray-500">{session?.user?.email || ""}</p>
           </div>
-          <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+          <button
+            type="button"
+            onClick={() => {
+              setIsMenuOpen(false);
+              signOut({ redirectTo: "/signin" });
+            }}
+            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
             ログアウト
           </button>
         </div>
       )}
 
-      {/* メニューを閉じるためのオーバーレイ */}
       {isMenuOpen && (
         <div
           className="fixed inset-0 z-40"

@@ -1,21 +1,14 @@
-import prisma from "@/lib/prisma";
+"use server";
 
-/**
- * 現在のユーザーIDを取得する。
- * ユーザーが存在しなければ "Guest User" を作成してそのIDを返す。
- * 保存・取得で同じIDを使うことで一覧に記事が表示される。
- */
-export async function getCurrentUserId(): Promise<string> {
-  let user = await prisma.user.findFirst({
-    select: { id: true },
-  });
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-  if (!user) {
-    user = await prisma.user.create({
-      data: { name: "Guest User" },
-      select: { id: true },
-    });
+export async function getCurrentUserId() {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/signin");
   }
 
-  return user.id;
+  return session.user.id;
 }

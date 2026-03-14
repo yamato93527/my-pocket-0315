@@ -22,12 +22,15 @@ function MobileLayout({ children }: MobileLayoutProps) {
       document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
     } else {
       const scrollY = document.body.style.top;
       document.body.style.position = "";
       document.body.style.top = "";
       document.body.style.width = "";
-      window.scrollTo(0, parseInt(scrollY || "0") * -1);
+      document.body.style.overflow = "";
+      const scrollPosition = scrollY ? parseInt(scrollY, 10) * -1 : 0;
+      window.scrollTo(0, Math.max(0, scrollPosition));
     }
   }, [isSidebarOpen]);
 

@@ -1,7 +1,6 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { checkUrlExists } from "./checkUrlExists";
 
 type ArticleDataProps = {
   title: string;
@@ -23,15 +22,35 @@ export async function saveArticle(
   userId: string
 ): Promise<SaveArticleResult> {
   try {
-    const isDuplicate = await checkUrlExists(articleData.url);
-    if (isDuplicate) {
-      console.log("URLが重複しています");
-      return {
-        errorMessage: "この記事はすでに登録されています",
-        success: false,
-      };
+    const existing = await prisma.article.findUnique({
+      where: { url: articleData.url },
+      select: { id: true, userId: true },
+    });
+
+    if (existing) {
+      if (existing.userId === userId) {
+        return {
+          errorMessage: "この記事はすでに登録されています",
+          success: false,
+        };
+      }
+      // 別ユーザー登録分 → 現在のユーザーに紐づけ直す
+      await prisma.article.update({
+        where: { id: existing.id },
+        data: {
+          userId,
+          title: articleData.title,
+          siteName: articleData.siteName,
+          description: articleData.description,
+          siteUpdatedAt: articleData.siteUpdatedAt,
+          thumbnail: articleData.thumbnail,
+          content: articleData.content,
+          updatedAt: new Date(),
+        },
+      });
+      return { success: true };
     }
-    // データ保存
+
     await prisma.article.create({
       data: {
         userId,

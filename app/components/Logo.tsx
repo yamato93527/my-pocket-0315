@@ -5,7 +5,7 @@ function Logo() {
   return (
     <div className="h-full">
       <Link
-        href="/"
+        href="/articles"
         className="h-full flex items-center"
       >
         <div className="relative h-full aspect-square mr-1">

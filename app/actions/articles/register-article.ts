@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 import { extractUrlData } from "./extract-url-data";
 import { saveArticle } from "./save-article";
 
@@ -12,6 +12,11 @@ export async function registerArticle(
   formData: FormData
 ): Promise<RegisterArticleState> {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "ログインしてください" };
+    }
+
     const rawUrl = formData.get("url");
     const url = typeof rawUrl === "string" ? rawUrl.trim() : "";
 
@@ -27,26 +32,13 @@ export async function registerArticle(
 
     const articleData = await extractUrlData(url);
 
-    let user = await prisma.user.findFirst({
-      select: { id: true },
-    });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          name: "Guest User",
-        },
-        select: { id: true },
-      });
-    }
-
-    const result = await saveArticle(articleData, user.id);
+    const result = await saveArticle(articleData, session.user.id);
+    revalidatePath("/articles");
     if (!result.success) {
       return {
         error: result.errorMessage ?? "予期しないエラーが発生しました",
       };
     }
-    revalidatePath("/");
     return null;
   } catch (err) {
     console.error(err);

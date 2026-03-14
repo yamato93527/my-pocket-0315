@@ -45,7 +45,7 @@ function InputFormGroup() {
         setError(errorMessage);
         return;
       }
-      const redirectUrl = `/?keyword=${encodeURIComponent(keyword)}`;
+      const redirectUrl = `/articles?keyword=${encodeURIComponent(keyword)}`;
       redirect(redirectUrl);
       return;
     }
