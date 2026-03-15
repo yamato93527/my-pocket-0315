@@ -6,6 +6,8 @@ import { randomUUID } from "node:crypto";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  // Vercel/proxy 経由の Host ヘッダーでも Auth.js が拒否しないようにする
+  trustHost: true,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
