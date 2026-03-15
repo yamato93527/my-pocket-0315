@@ -30,6 +30,8 @@ function getPrisma(): PrismaClient {
 // ビルド時は DATABASE_URL が無くてもモジュール読み込みで落ちないように Proxy で遅延初期化
 export default new Proxy({} as PrismaClient, {
   get(_, prop) {
-    return (getPrisma() as Record<string | symbol, unknown>)[prop];
+    const client = getPrisma();
+    const value = Reflect.get(client as object, prop);
+    return typeof value === "function" ? value.bind(client) : value;
   },
 });
