@@ -1,14 +1,21 @@
 import Image from "next/image";
 import { signIn } from "@/auth";
+import { headers } from "next/headers";
 
 async function signInWithGoogle() {
   "use server";
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? "https";
+  const redirectUri = host ? `${protocol}://${host}/api/auth/callback/google` : undefined;
+
   await signIn(
     "google",
     { redirectTo: "/" },
     {
       prompt: "login",
       max_age: "0",
+      ...(redirectUri ? { redirect_uri: redirectUri } : {}),
     }
   );
 }
